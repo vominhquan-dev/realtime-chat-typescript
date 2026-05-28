@@ -1,0 +1,93 @@
+/\*\*
+
+- MIGRATION PLAN: Feature-Based Structure
+-
+- From:
+- src/
+- ├── controller/
+- ├── service/
+- ├── model/
+- ├── routes/modules/
+- └── ...
+-
+- To:
+- src/
+- ├── features/
+- │ ├── auth/
+- │ │ ├── auth.controller.js
+- │ │ ├── auth.service.js
+- │ │ ├── auth.routes.js
+- │ │ └── auth.model.js (Users.js)
+- │ ├── users/ (without auth)
+- │ ├── messages/
+- │ ├── conversations/
+- │ └── friends/
+- ├── shared/
+- │ ├── middleware/
+- │ ├── utils/
+- │ └── constants/
+- ├── config/
+- ├── socket/
+- ├── routes/
+- │ └── index.js
+- └── server.js
+-
+- FEATURE MAPPING:
+-
+- 1.  AUTH
+- - controller/auth.controller.js → features/auth/auth.controller.js ✅
+- - service/auth.service.js → features/auth/auth.service.js ✅
+- - model/Users.js → features/auth/auth.model.js ✅
+- - routes/modules/auth.routes.js → features/auth/auth.routes.js ✅
+-
+- 2.  USERS (rest without auth)
+- - controller/user.controller.js → features/users/user.controller.js
+- - service/user.service.js → features/users/user.service.js
+- - routes/modules/user.routes.js → features/users/user.routes.js
+-
+- 3.  MESSAGES
+- - controller/message.controller.js → features/messages/message.controller.js
+- - service/message.service.js → features/messages/message.service.js
+- - service/onlineUsers.service.js → features/messages/onlineUsers.service.js
+- - model/Message.js → features/messages/message.model.js
+- - routes/modules/message.routes.js → features/messages/message.routes.js
+-
+- 4.  CONVERSATIONS
+- - controller/conversation.controller.js → features/conversations/conversation.controller.js
+- - service/conversation.service.js → features/conversations/conversation.service.js
+- - model/Conversation.js → features/conversations/conversation.model.js
+- - routes/modules/conversation.routes.js → features/conversations/conversation.routes.js
+-
+- 5.  FRIENDS
+- - controller/friend.controller.js → features/friends/friend.controller.js
+- - service/friend.service.js → features/friends/friend.service.js
+- - service/friendRequest.service.js → features/friends/friendRequest.service.js
+- - model/Friend.js → features/friends/friend.model.js
+- - model/FriendRequest.js → features/friends/friendRequest.model.js
+- - routes/modules/friend.routes.js → features/friends/friend.routes.js
+- - middleware/friend.middleware.js → shared/middleware/friend.middleware.js
+-
+- SHARED FILES:
+- - middleware/auth.middleware.js → shared/middleware/auth.middleware.js
+- - utils/ApiResponse.js → shared/utils/ApiResponse.js
+- - utils/MessageHelper.js → shared/utils/MessageHelper.js
+- - constants/ → shared/constants/
+- - config/ → config/ (stays same)
+- - socket/ → socket/ (stays same)
+-
+- IMPORT UPDATES NEEDED:
+-
+- OLD: import User from "../../model/Users.js"
+- NEW: import User from "../../features/auth/auth.model.js"
+-
+- OLD: import ApiResponse from "../../utils/ApiResponse.js"
+- NEW: import ApiResponse from "../../shared/utils/ApiResponse.js"
+-
+- OLD: import { MessagesError } from "../../constants/messagesError.js"
+- NEW: import { MessagesError } from "../../shared/constants/messagesError.js"
+-
+- OLD: import { authenticate } from "../../middleware/auth.middleware.js"
+- NEW: import { authenticate } from "../../shared/middleware/auth.middleware.js"
+  \*/
+
+export const MIGRATION_COMPLETE = false;
