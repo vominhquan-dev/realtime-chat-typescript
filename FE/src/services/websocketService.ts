@@ -10,11 +10,23 @@ class SocketService {
   private url: string;
   private messageHandlers: Map<string, MessageHandler[]> = new Map();
   private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
+  private currentUserId: string | null = null;
 
   constructor(
-    url: string = import.meta.env.VITE_WS_URL || "http://localhost:3000"
+    url: string = import.meta.env.VITE_WS_URL || "http://localhost:3000",
   ) {
     this.url = url;
+  }
+
+  /**
+   * Set current user ID for private messaging
+   */
+  setCurrentUserId(userId: string): void {
+    this.currentUserId = userId;
+    // If already connected, register with the server
+    if (this.socket?.connected) {
+      this.socket.emit("user_join", userId);
+    }
   }
 
   /**
@@ -53,11 +65,17 @@ class SocketService {
         });
 
         const handleConnect = async () => {
-          // Send user info when connected (non-blocking)
+          // Send user info when connected
           try {
             const response = await fetchUserProfile();
             const user = response.data;
             if (user) {
+              this.currentUserId = user._id;
+              // Register user for private messaging
+              this.socket?.emit("user_join", user._id);
+              // Join public room
+              this.socket?.emit("join_public");
+              // Send user info
               this.socket?.emit("user-info", {
                 userId: user._id,
                 username: user.username,
@@ -66,7 +84,13 @@ class SocketService {
               });
             }
           } catch (error) {
-            // Silently fail if user profile fetch fails
+            // Fallback: use token user info
+            const tokenUser = getCurrentUserFromToken();
+            if (tokenUser?.id) {
+              this.currentUserId = tokenUser.id;
+              this.socket?.emit("user_join", tokenUser.id);
+              this.socket?.emit("join_public");
+            }
           }
 
           this.startHeartbeat();
@@ -102,10 +126,11 @@ class SocketService {
     this.stopHeartbeat();
     this.socket?.disconnect();
     this.socket = null;
+    this.currentUserId = null;
   }
 
   /**
-   * Send message
+   * Send message via socket
    */
   sendMessage(event: string, data: any): void {
     if (!this.socket) return;
@@ -113,7 +138,7 @@ class SocketService {
   }
 
   /**
-   * Subscribe
+   * Subscribe to an event
    */
   on(event: string, handler: MessageHandler): void {
     if (!this.messageHandlers.has(event)) {
@@ -123,7 +148,7 @@ class SocketService {
   }
 
   /**
-   * Unsubscribe
+   * Unsubscribe from an event
    */
   off(event: string, handler: MessageHandler): void {
     const handlers = this.messageHandlers.get(event);
@@ -133,14 +158,65 @@ class SocketService {
   }
 
   /**
-   * Check connection
+   * Check if connected
    */
   isConnected(): boolean {
     return !!this.socket && this.socket.connected;
   }
 
   /**
-   * Heartbeat (optional)
+   * Get current user ID
+   */
+  getCurrentUserId(): string | null {
+    return this.currentUserId;
+  }
+
+  /**
+   * Join a conversation room (for private messaging)
+   */
+  joinConversation(conversationId: string): void {
+    this.socket?.emit("join_conversation", conversationId);
+  }
+
+  /**
+   * Send private message
+   */
+  sendPrivateMessage(data: {
+    conversationId: string;
+    senderId: string;
+    recipientId: string;
+    content: string;
+  }): void {
+    this.socket?.emit("send_message", data);
+  }
+
+  /**
+   * Send typing indicator
+   */
+  sendTyping(conversationId: string, userId: string, username: string): void {
+    this.socket?.emit("typing", { conversationId, userId, username });
+  }
+
+  /**
+   * Send stop typing indicator
+   */
+  sendStopTyping(conversationId: string): void {
+    this.socket?.emit("stop_typing", conversationId);
+  }
+
+  /**
+   * Mark message as seen
+   */
+  markMessageSeen(
+    messageId: string,
+    conversationId: string,
+    userId: string,
+  ): void {
+    this.socket?.emit("message_seen", { messageId, conversationId, userId });
+  }
+
+  /**
+   * Heartbeat
    */
   private startHeartbeat(): void {
     this.heartbeatInterval = setInterval(() => {

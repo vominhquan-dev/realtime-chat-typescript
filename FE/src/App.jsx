@@ -1,7 +1,10 @@
+// App.jsx
+
 import { useEffect } from "react";
-import { Provider } from "react-redux";
-import { useSelector } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import { Toaster } from "sonner";
+import { useNavigate } from "react-router-dom";
+
 import { store } from "@/app/store";
 import { AppRoutes } from "@/routes";
 import { useSocketConnection } from "@/hooks/useSocketConnection";
@@ -9,8 +12,16 @@ import { useSocketConnection } from "@/hooks/useSocketConnection";
 function AppContent() {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-  // Hook to manage socket connection
+  const navigate = useNavigate();
+
+  // Connect socket
   useSocketConnection();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <>

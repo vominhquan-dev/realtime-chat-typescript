@@ -7,7 +7,7 @@ export interface ChatMessage {
     avatar?: string;
   };
   timestamp: Date;
-  status?: "sent" | "delivered" | "read";
+  status?: "sending" | "sent" | "delivered" | "read";
 }
 
 export interface ChatRoom {
