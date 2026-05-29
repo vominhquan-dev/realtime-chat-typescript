@@ -50,7 +50,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
 
   return (
     <div
-      className={`group flex items-end gap-2.5 mb-4 ${
+      className={`group flex items-end gap-2.5 mb-3 transition-all duration-200 ${
         isOwn ? "flex-row-reverse" : "flex-row"
       }`}
     >
@@ -59,7 +59,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
         <div
           className={`h-8 w-8 rounded-full bg-gradient-to-br ${getAvatarColor(
             username,
-          )} flex items-center justify-center text-white text-xs font-bold shadow-sm`}
+          )} flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-white dark:ring-gray-800`}
         >
           {message.sender.avatar ? (
             <img
@@ -81,34 +81,60 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
       >
         {/* Username & Time */}
         <div
-          className={`flex items-center gap-2 mb-1 ${
+          className={`flex items-center gap-2 mb-1.5 ${
             isOwn ? "flex-row-reverse" : "flex-row"
           }`}
         >
-          <span className="text-xs font-semibold text-gray-500">
+          <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             {isOwn ? "You" : username}
           </span>
-          <span className="text-[10px] text-gray-400">
+          <span className="text-[10px] text-gray-400 dark:text-gray-500">
             {formatTime(message.timestamp)}
           </span>
         </div>
 
         {/* Bubble */}
         <div
-          className={`relative px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+          className={`relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 group-hover:shadow-md ${
             isOwn
               ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white rounded-tr-md"
-              : "bg-white border border-gray-200 text-gray-800 rounded-tl-md"
+              : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-md shadow-gray-200/50 dark:shadow-gray-900/30"
           }`}
         >
           <p className="whitespace-pre-wrap break-words">{message.content}</p>
 
           {/* Status indicator for own messages */}
           {isOwn && message.status && (
-            <div className="flex items-center justify-end gap-1 mt-1">
+            <div className="flex items-center justify-end gap-1 mt-1.5">
+              <span className="text-[10px] text-white/60 mr-0.5">
+                {formatTime(message.timestamp)}
+              </span>
               <StatusIcon />
             </div>
           )}
+
+          {/* Tail decoration for bubble */}
+          <div
+            className={`absolute bottom-0 w-3 h-3 ${
+              isOwn
+                ? "right-[-5px] text-violet-500"
+                : "left-[-5px] text-white dark:text-gray-800"
+            }`}
+          >
+            <svg
+              viewBox="0 0 12 12"
+              className="w-full h-full"
+              fill="currentColor"
+            >
+              <path
+                d={
+                  isOwn
+                    ? "M12 0C7.5 0 4 3.5 4 8v4h8V0z"
+                    : "M0 0C4.5 0 8 3.5 8 8v4H0V0z"
+                }
+              />
+            </svg>
+          </div>
         </div>
       </div>
     </div>

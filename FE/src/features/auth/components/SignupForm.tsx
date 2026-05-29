@@ -6,6 +6,7 @@ import { Button, Input, Label } from "@/components/ui";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { AUTH_VALIDATION, AUTH_ROUTES } from "@/features/auth/constants";
 import { SignupCredentials } from "@/types/auth";
+import { UserPlus } from "lucide-react";
 
 export function SignupForm() {
   const navigate = useNavigate();
@@ -62,25 +63,31 @@ export function SignupForm() {
   const isFormValid = isValid && !isLoading;
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
+    <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">CREATE ACCOUNT</h1>
-        <p className="text-balance text-sm text-muted-foreground">
+        {/* Logo icon */}
+        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25 mb-1">
+          <span className="text-white font-bold text-lg">RC</span>
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight">CREATE ACCOUNT</h1>
+        <p className="text-balance text-sm text-muted-foreground max-w-xs">
           Sign up to get started with our platform
         </p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4 max-h-[420px] overflow-y-auto pr-1 custom-scrollbar">
         {/* Username */}
-        <div className="grid gap-2">
-          <Label htmlFor="username">Username</Label>
+        <div className="grid gap-1.5">
+          <Label htmlFor="username" className="text-sm font-medium">
+            Username
+          </Label>
           <Input
             id="username"
             placeholder="Enter your username"
-            className={`border p-2 rounded bg-white text-gray-900 placeholder:text-gray-500 placeholder:font-semibold focus:outline-none focus:ring-2 ${
+            className={`h-11 pl-4 pr-4 border rounded-xl bg-white/50 text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 transition-all duration-200 ${
               errors.username
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-blue-500"
+                ? "border-red-400 focus:ring-red-400/30 focus:border-red-400"
+                : "border-gray-200 focus:ring-violet-400/30 focus:border-violet-400"
             }`}
             {...register("username", {
               required: AUTH_VALIDATION.USERNAME_REQUIRED,
@@ -91,24 +98,28 @@ export function SignupForm() {
             })}
           />
           {errors.username && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-md mt-2 flex items-center gap-2">
-              <span>⚠️</span>
+            <div className="bg-red-50/80 border border-red-200 text-red-700 text-sm px-3.5 py-2.5 rounded-xl mt-1 flex items-center gap-2.5 animate-fade-in">
+              <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs">⚠️</span>
+              </div>
               <span>{errors.username.message}</span>
             </div>
           )}
         </div>
 
         {/* Email */}
-        <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
+        <div className="grid gap-1.5">
+          <Label htmlFor="email" className="text-sm font-medium">
+            Email
+          </Label>
           <Input
             id="email"
             type="email"
             placeholder="Enter your email"
-            className={`border p-2 rounded bg-white text-gray-900 placeholder:text-gray-500 placeholder:font-semibold focus:outline-none focus:ring-2 ${
+            className={`h-11 pl-4 pr-4 border rounded-xl bg-white/50 text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 transition-all duration-200 ${
               errors.email
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-blue-500"
+                ? "border-red-400 focus:ring-red-400/30 focus:border-red-400"
+                : "border-gray-200 focus:ring-violet-400/30 focus:border-violet-400"
             }`}
             {...register("email", {
               required: AUTH_VALIDATION.EMAIL_REQUIRED,
@@ -119,23 +130,27 @@ export function SignupForm() {
             })}
           />
           {errors.email && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-md mt-2 flex items-center gap-2">
-              <span>⚠️</span>
+            <div className="bg-red-50/80 border border-red-200 text-red-700 text-sm px-3.5 py-2.5 rounded-xl mt-1 flex items-center gap-2.5 animate-fade-in">
+              <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs">⚠️</span>
+              </div>
               <span>{errors.email.message}</span>
             </div>
           )}
         </div>
 
         {/* Phone */}
-        <div className="grid gap-2">
-          <Label htmlFor="phone">Phone</Label>
+        <div className="grid gap-1.5">
+          <Label htmlFor="phone" className="text-sm font-medium">
+            Phone
+          </Label>
           <Input
             id="phone"
             placeholder="Enter your phone number"
-            className={`border p-2 rounded bg-white text-gray-900 placeholder:text-gray-500 placeholder:font-semibold focus:outline-none focus:ring-2 ${
+            className={`h-11 pl-4 pr-4 border rounded-xl bg-white/50 text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 transition-all duration-200 ${
               errors.phone
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-blue-500"
+                ? "border-red-400 focus:ring-red-400/30 focus:border-red-400"
+                : "border-gray-200 focus:ring-violet-400/30 focus:border-violet-400"
             }`}
             {...register("phone", {
               required: AUTH_VALIDATION.PHONE_REQUIRED,
@@ -146,35 +161,42 @@ export function SignupForm() {
             })}
           />
           {errors.phone && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-md mt-2 flex items-center gap-2">
-              <span>⚠️</span>
+            <div className="bg-red-50/80 border border-red-200 text-red-700 text-sm px-3.5 py-2.5 rounded-xl mt-1 flex items-center gap-2.5 animate-fade-in">
+              <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs">⚠️</span>
+              </div>
               <span>{errors.phone.message}</span>
             </div>
           )}
         </div>
 
         {/* Avatar Image */}
-        <div className="grid gap-2">
-          <Label htmlFor="avatarImage">Avatar URL (Optional)</Label>
+        <div className="grid gap-1.5">
+          <Label htmlFor="avatarImage" className="text-sm font-medium">
+            Avatar URL{" "}
+            <span className="text-gray-400 font-normal">(Optional)</span>
+          </Label>
           <Input
             id="avatarImage"
             placeholder="Enter avatar image URL"
-            className="border p-2 rounded bg-white text-gray-900 placeholder:text-gray-500 placeholder:font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="h-11 pl-4 pr-4 border rounded-xl bg-white/50 text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 transition-all duration-200 border-gray-200 focus:ring-violet-400/30 focus:border-violet-400"
             {...register("avatarImage")}
           />
         </div>
 
         {/* Password */}
-        <div className="grid gap-2">
-          <Label htmlFor="password">Password</Label>
+        <div className="grid gap-1.5">
+          <Label htmlFor="password" className="text-sm font-medium">
+            Password
+          </Label>
           <Input
             id="password"
             type="password"
             placeholder="**********"
-            className={`border p-2 rounded bg-white text-gray-900 placeholder:text-gray-500 placeholder:font-semibold focus:outline-none focus:ring-2 ${
+            className={`h-11 pl-4 pr-4 border rounded-xl bg-white/50 text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 transition-all duration-200 ${
               errors.password
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-blue-500"
+                ? "border-red-400 focus:ring-red-400/30 focus:border-red-400"
+                : "border-gray-200 focus:ring-violet-400/30 focus:border-violet-400"
             }`}
             {...register("password", {
               required: AUTH_VALIDATION.PASSWORD_REQUIRED,
@@ -185,24 +207,28 @@ export function SignupForm() {
             })}
           />
           {errors.password && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-md mt-2 flex items-center gap-2">
-              <span>⚠️</span>
+            <div className="bg-red-50/80 border border-red-200 text-red-700 text-sm px-3.5 py-2.5 rounded-xl mt-1 flex items-center gap-2.5 animate-fade-in">
+              <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs">⚠️</span>
+              </div>
               <span>{errors.password.message}</span>
             </div>
           )}
         </div>
 
         {/* Confirm Password */}
-        <div className="grid gap-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <div className="grid gap-1.5">
+          <Label htmlFor="confirmPassword" className="text-sm font-medium">
+            Confirm Password
+          </Label>
           <Input
             id="confirmPassword"
             type="password"
             placeholder="**********"
-            className={`border p-2 rounded bg-white text-gray-900 placeholder:text-gray-500 placeholder:font-semibold focus:outline-none focus:ring-2 ${
+            className={`h-11 pl-4 pr-4 border rounded-xl bg-white/50 text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 transition-all duration-200 ${
               errors.confirmPassword
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-blue-500"
+                ? "border-red-400 focus:ring-red-400/30 focus:border-red-400"
+                : "border-gray-200 focus:ring-violet-400/30 focus:border-violet-400"
             }`}
             {...register("confirmPassword", {
               required: AUTH_VALIDATION.CONFIRM_PASSWORD_REQUIRED,
@@ -211,25 +237,65 @@ export function SignupForm() {
             })}
           />
           {errors.confirmPassword && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-md mt-2 flex items-center gap-2">
-              <span>⚠️</span>
+            <div className="bg-red-50/80 border border-red-200 text-red-700 text-sm px-3.5 py-2.5 rounded-xl mt-1 flex items-center gap-2.5 animate-fade-in">
+              <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs">⚠️</span>
+              </div>
               <span>{errors.confirmPassword.message}</span>
             </div>
           )}
         </div>
+      </div>
 
+      <div className="grid gap-4">
         {/* Sign Up Button */}
-        <Button type="submit" className="w-full" disabled={!isFormValid}>
-          {isLoading ? "Signing up..." : "Sign Up"}
+        <Button
+          type="submit"
+          className="w-full h-11 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          disabled={!isFormValid}
+        >
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <svg
+                className="animate-spin h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              Signing up...
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" />
+              Sign Up
+            </span>
+          )}
         </Button>
 
-        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-          <span className="relative z-10 bg-background px-2 text-muted-foreground">
+        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-gray-200">
+          <span className="relative z-10 bg-white/80 px-3 text-muted-foreground text-xs uppercase tracking-wider font-medium">
             Or continue with
           </span>
         </div>
 
-        <Button variant="outline" className="w-full" type="button">
+        <Button
+          variant="outline"
+          className="w-full h-11 rounded-xl border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+          type="button"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -257,9 +323,12 @@ export function SignupForm() {
         </Button>
       </div>
 
-      <div className="text-center text-sm">
+      <div className="text-center text-sm text-gray-500">
         Already have an account?{" "}
-        <a href={AUTH_ROUTES.LOGIN} className="underline underline-offset-4">
+        <a
+          href={AUTH_ROUTES.LOGIN}
+          className="text-violet-600 hover:text-violet-700 font-medium underline underline-offset-4 hover:decoration-2 transition-all"
+        >
           Login
         </a>
       </div>

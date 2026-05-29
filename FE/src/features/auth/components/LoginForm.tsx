@@ -6,6 +6,7 @@ import { Button, Input, Label } from "@/components/ui";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { AUTH_VALIDATION, AUTH_ROUTES } from "@/features/auth/constants";
 import { LoginCredentials } from "@/types/auth";
+import { LogIn } from "lucide-react";
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -52,30 +53,40 @@ export function LoginForm() {
   return (
     <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">WELLCOME BACK</h1>
-        <p className="text-balance text-sm text-muted-foreground">
+        {/* Logo icon */}
+        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25 mb-1">
+          <span className="text-white font-bold text-lg">RC</span>
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight">WELCOME BACK</h1>
+        <p className="text-balance text-sm text-muted-foreground max-w-xs">
           Enter your email below to login to your account
         </p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-5">
         <div className="grid gap-2">
-          <Label htmlFor="identifier">Email or Username</Label>
-          <Input
-            id="identifier"
-            placeholder="Enter your email or username"
-            className={`border p-2 rounded bg-white text-gray-900 placeholder:text-gray-500 placeholder:font-semibold focus:outline-none focus:ring-2 ${
-              errors.identifier
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-blue-500"
-            }`}
-            {...register("identifier", {
-              required: AUTH_VALIDATION.IDENTIFIER_REQUIRED,
-            })}
-          />
+          <Label htmlFor="identifier" className="text-sm font-medium">
+            Email or Username
+          </Label>
+          <div className="relative">
+            <Input
+              id="identifier"
+              placeholder="Enter your email or username"
+              className={`h-11 pl-4 pr-4 border rounded-xl bg-white/50 text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 transition-all duration-200 ${
+                errors.identifier
+                  ? "border-red-400 focus:ring-red-400/30 focus:border-red-400"
+                  : "border-gray-200 focus:ring-violet-400/30 focus:border-violet-400"
+              }`}
+              {...register("identifier", {
+                required: AUTH_VALIDATION.IDENTIFIER_REQUIRED,
+              })}
+            />
+          </div>
           {errors.identifier && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-md mt-2 flex items-center gap-2 animate-fade-in">
-              <span>⚠️</span>
+            <div className="bg-red-50/80 border border-red-200 text-red-700 text-sm px-3.5 py-2.5 rounded-xl mt-1 flex items-center gap-2.5 animate-fade-in">
+              <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs">⚠️</span>
+              </div>
               <span>{errors.identifier.message}</span>
             </div>
           )}
@@ -83,48 +94,93 @@ export function LoginForm() {
 
         <div className="grid gap-2">
           <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-sm font-medium">
+              Password
+            </Label>
             <a
               href={AUTH_ROUTES.FORGOT_PASSWORD}
-              className="ml-auto text-sm underline-offset-4 hover:underline"
+              className="ml-auto text-sm text-violet-600 hover:text-violet-700 underline-offset-4 hover:underline transition-colors"
             >
               Forgot your password?
             </a>
           </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="**********"
-            className={`border p-2 rounded bg-white text-gray-900 placeholder:text-gray-500 placeholder:font-semibold focus:outline-none focus:ring-2 ${
-              errors.password
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-blue-500"
-            }`}
-            {...register("password", {
-              required: AUTH_VALIDATION.PASSWORD_REQUIRED,
-              minLength: {
-                value: 8,
-                message: AUTH_VALIDATION.PASSWORD_MIN_LENGTH,
-              },
-            })}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type="password"
+              placeholder="**********"
+              className={`h-11 pl-4 pr-4 border rounded-xl bg-white/50 text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 transition-all duration-200 ${
+                errors.password
+                  ? "border-red-400 focus:ring-red-400/30 focus:border-red-400"
+                  : "border-gray-200 focus:ring-violet-400/30 focus:border-violet-400"
+              }`}
+              {...register("password", {
+                required: AUTH_VALIDATION.PASSWORD_REQUIRED,
+                minLength: {
+                  value: 8,
+                  message: AUTH_VALIDATION.PASSWORD_MIN_LENGTH,
+                },
+              })}
+            />
+          </div>
           {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
+            <div className="bg-red-50/80 border border-red-200 text-red-700 text-sm px-3.5 py-2.5 rounded-xl mt-1 flex items-center gap-2.5 animate-fade-in">
+              <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs">⚠️</span>
+              </div>
+              <span>{errors.password.message}</span>
+            </div>
           )}
         </div>
 
         {/* ✅ Nút Login với điều kiện isFormValid */}
-        <Button type="submit" className="w-full" disabled={!isFormValid}>
-          {isLoading ? "Logging in..." : "Login"}
+        <Button
+          type="submit"
+          className="w-full h-11 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          disabled={!isFormValid}
+        >
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <svg
+                className="animate-spin h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              Logging in...
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <LogIn className="h-4 w-4" />
+              Login
+            </span>
+          )}
         </Button>
 
-        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-          <span className="relative z-10 bg-background px-2 text-muted-foreground">
+        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-gray-200">
+          <span className="relative z-10 bg-white/80 px-3 text-muted-foreground text-xs uppercase tracking-wider font-medium">
             Or continue with
           </span>
         </div>
 
-        <Button variant="outline" className="w-full" type="button">
+        <Button
+          variant="outline"
+          className="w-full h-11 rounded-xl border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+          type="button"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -152,9 +208,12 @@ export function LoginForm() {
         </Button>
       </div>
 
-      <div className="text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <a href="/signup" className="underline underline-offset-4">
+      <div className="text-center text-sm text-gray-500">
+        Don't have an account?{" "}
+        <a
+          href="/signup"
+          className="text-violet-600 hover:text-violet-700 font-medium underline underline-offset-4 hover:decoration-2 transition-all"
+        >
           Sign up
         </a>
       </div>
