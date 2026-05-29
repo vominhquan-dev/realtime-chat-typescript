@@ -8,7 +8,7 @@ class MessageService {
     senderId,
     recipientId,
     content,
-    conversationId
+    conversationId,
   ) => {
     try {
       let conversation;
@@ -85,7 +85,7 @@ class MessageService {
       // Check if sender is a member
       const senderIdStr = senderId.toString();
       const isMember = conversation.participants.some(
-        (p) => p.userId.toString() === senderIdStr
+        (p) => p.userId.toString() === senderIdStr,
       );
 
       if (!isMember) {
@@ -151,7 +151,7 @@ class MessageService {
       // Mark all messages as seen by this user
       await Message.updateMany(
         { conversationId },
-        { $addToSet: { seenBy: userId } }
+        { $addToSet: { seenBy: userId } },
       );
 
       // Reset unread count for this user
@@ -168,7 +168,7 @@ class MessageService {
     conversationId,
     userId,
     limit = 20,
-    cursor = null
+    cursor = null,
   ) => {
     try {
       if (!conversationId || !userId) {
@@ -210,6 +210,61 @@ class MessageService {
 
       // Mark as read for this user
       await this.markConversationAsRead(conversationId, userId);
+
+      return {
+        messages: result.reverse(),
+        nextCursor: hasMore ? nextCursor : null,
+        hasMore,
+      };
+    } catch (error) {
+      throw new Error(error.message || MessagesError.ERROR.INTERNAL);
+    }
+  };
+
+  getPublicMessages = async (limit = 50, cursor = null) => {
+    try {
+      // Find public conversations (type "group" or any public conversation)
+      const publicConversations = await Conversation.find({
+        type: "group",
+      }).select("_id");
+
+      const conversationIds = publicConversations.map((c) => c._id);
+
+      if (conversationIds.length === 0) {
+        return { messages: [], nextCursor: null, hasMore: false };
+      }
+
+      const query = { conversationId: { $in: conversationIds } };
+
+      // If cursor provided, fetch messages before this cursor timestamp
+      if (cursor) {
+        const cursorDate = new Date(cursor);
+        query.timestamp = { $lt: cursorDate };
+      }
+
+      const messages = await Message.find(query)
+        .sort({ timestamp: -1 })
+        .limit(limit + 1)
+        .populate({
+          path: "senderId",
+          select: "username avatarImage",
+        })
+        .populate({
+          path: "conversationId",
+          select: "name avatar",
+        });
+
+      // Determine if there are more messages
+      let hasMore = false;
+      let result = messages;
+
+      if (messages.length > limit) {
+        hasMore = true;
+        result = messages.slice(0, limit);
+      }
+
+      const nextCursor =
+        result.length > 0 ? result[result.length - 1].timestamp : null;
 
       return {
         messages: result.reverse(),

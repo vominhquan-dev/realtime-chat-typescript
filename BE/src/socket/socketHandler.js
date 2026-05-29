@@ -1,5 +1,30 @@
 // Store active users and their socket IDs
 const activeUsers = new Map(); // userId -> socketId
+const PUBLIC_CONVERSATION_NAME = "Public Chat";
+
+// Get or create the public conversation
+const getOrCreatePublicConversation = async (Conversation) => {
+  let publicConv = await Conversation.findOne({
+    type: "group",
+    "group.name": PUBLIC_CONVERSATION_NAME,
+  });
+
+  if (!publicConv) {
+    publicConv = await Conversation.create({
+      type: "group",
+      group: {
+        name: PUBLIC_CONVERSATION_NAME,
+        avatarImage: null,
+      },
+      participants: [],
+      lastMessageAt: new Date(),
+      unreadCounts: new Map(),
+    });
+    console.log(`🏠 Created Public Chat conversation: ${publicConv._id}`);
+  }
+
+  return publicConv;
+};
 
 export const setupSocket = (io, messageService, conversationService) => {
   io.on("connection", (socket) => {
@@ -10,13 +35,91 @@ export const setupSocket = (io, messageService, conversationService) => {
       activeUsers.set(userId, socket.id);
       socket.userId = userId;
       console.log(
-        `✅ User ${userId} joined. Active users: ${activeUsers.size}`
+        `✅ User ${userId} joined. Active users: ${activeUsers.size}`,
       );
 
       // Broadcast online status
       io.emit("user_online", { userId, status: "online" });
+
+      // Broadcast updated user count
+      io.emit("online_users", Array.from(activeUsers.keys()));
     });
 
+    // ===== PUBLIC CHAT =====
+    // Send public message - Save to DB + Broadcast to everyone
+    socket.on("send_public_message", async (data) => {
+      try {
+        const { content, senderId, username, _id: clientMsgId, avatar } = data;
+
+        if (!content || !senderId) {
+          socket.emit("error_message", {
+            message: "Missing content or sender",
+          });
+          return;
+        }
+
+        // Get the Message model dynamically
+        const mongoose = (await import("mongoose")).default;
+        const Message =
+          mongoose.models.Message ||
+          (await import("../model/message.js")).default;
+        const Conversation =
+          mongoose.models.Conversation ||
+          (await import("../model/Conversation.js")).default;
+
+        // Get or create the Public Chat conversation
+        const publicConv = await getOrCreatePublicConversation(Conversation);
+
+        // Save message to DB
+        const savedMessage = await Message.create({
+          conversationId: publicConv._id,
+          senderId,
+          content,
+          seenBy: [senderId],
+          timestamp: new Date(),
+        });
+
+        // Populate sender info
+        const populated = await Message.findById(savedMessage._id)
+          .populate({
+            path: "senderId",
+            select: "username avatarImage",
+          })
+          .lean();
+
+        // Update conversation's lastMessage
+        publicConv.lastMessageAt = new Date();
+        publicConv.lastMessage = {
+          messageId: savedMessage._id,
+          sendBy: senderId,
+          content,
+        };
+        await publicConv.save();
+
+        // Broadcast to ALL connected clients
+        io.emit("new_public_message", {
+          _id: savedMessage._id,
+          _clientId: clientMsgId, // Send back client's temp ID for replacement
+          content: populated.content,
+          senderId: populated.senderId,
+          timestamp: populated.timestamp,
+          seenBy: populated.seenBy,
+        });
+
+        console.log(`💬 Public message saved: ${savedMessage._id}`);
+      } catch (error) {
+        console.error("❌ Error saving public message:", error.message);
+        socket.emit("error_message", { message: error.message });
+      }
+    });
+
+    // Join public chat room (for consistency)
+    socket.on("join_public", () => {
+      socket.join("public_room");
+      console.log(`🔗 User ${socket.userId || socket.id} joined public room`);
+    });
+
+    // ===== DIRECT MESSAGES =====
     // Listen for new messages - Save to DB + Broadcast
     socket.on("send_message", async (data) => {
       try {
@@ -27,7 +130,7 @@ export const setupSocket = (io, messageService, conversationService) => {
           senderId,
           recipientId,
           content,
-          conversationId
+          conversationId,
         );
 
         // Broadcast to all users in conversation
@@ -51,13 +154,14 @@ export const setupSocket = (io, messageService, conversationService) => {
           });
         }
 
-        console.log(`💬 Message saved: ${savedMessage._id}`);
+        console.log(`💬 Direct message saved: ${savedMessage._id}`);
       } catch (error) {
         console.error("❌ Error saving message:", error.message);
         socket.emit("error_message", { message: error.message });
       }
     });
 
+    // ===== GROUP MESSAGES =====
     // Listen for group messages - Save to DB + Broadcast
     socket.on("send_group_message", async (data) => {
       try {
@@ -67,7 +171,7 @@ export const setupSocket = (io, messageService, conversationService) => {
         const savedMessage = await messageService.sendGroupMessage(
           conversationId,
           senderId,
-          content
+          content,
         );
 
         // Broadcast to all members in conversation
@@ -143,7 +247,7 @@ export const setupSocket = (io, messageService, conversationService) => {
         await messageService.markConversationAsRead(conversationId, userId);
 
         console.log(
-          `✅ Conversation ${conversationId} marked as read by ${userId}`
+          `✅ Conversation ${conversationId} marked as read by ${userId}`,
         );
       } catch (error) {
         console.error("❌ Error marking conversation as read:", error.message);
@@ -156,9 +260,10 @@ export const setupSocket = (io, messageService, conversationService) => {
       if (socket.userId) {
         activeUsers.delete(socket.userId);
         console.log(
-          `❌ User ${socket.userId} disconnected. Active users: ${activeUsers.size}`
+          `❌ User ${socket.userId} disconnected. Active users: ${activeUsers.size}`,
         );
         io.emit("user_offline", { userId: socket.userId, status: "offline" });
+        io.emit("online_users", Array.from(activeUsers.keys()));
       }
     });
   });

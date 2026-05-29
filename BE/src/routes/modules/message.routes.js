@@ -6,11 +6,19 @@ import {
   getConversationMessages,
   markMessageAsSeen,
   markConversationAsRead,
+  getPublicMessages,
 } from "../../controller/message.controller.js";
+import { getOnlineUsers } from "../../controller/online-users.controller.js";
 import { authenticate } from "../../middleware/auth.middleware.js";
 import { checkFriendship } from "../../middleware/friend.middleware.js";
 
 const router = express.Router();
+
+// Public messages (no authentication required)
+router.get("/public/history", getPublicMessages);
+
+// Online users (no authentication required)
+router.get("/online-users", getOnlineUsers);
 
 // Send direct message (check friendship)
 router.post("/direct", authenticate, checkFriendship, sendDirectMessage);

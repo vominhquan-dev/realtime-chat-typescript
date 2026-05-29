@@ -11,19 +11,19 @@ export const sendDirectMessage = async (req, res) => {
       senderId,
       recipientId,
       content,
-      conversationId
+      conversationId,
     );
     return ApiResponse.success(
       res,
       result,
       "Message sent successfully",
-      HTTP_STATUS.CREATED
+      HTTP_STATUS.CREATED,
     );
   } catch (error) {
     return ApiResponse.error(
       res,
       error.message || MessagesError.ERROR.INTERNAL,
-      HTTP_STATUS.INTERNAL_SERVER_ERROR
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
     );
   }
 };
@@ -38,27 +38,27 @@ export const sendGroupMessage = async (req, res) => {
       return ApiResponse.error(
         res,
         "Message content is required",
-        HTTP_STATUS.BAD_REQUEST
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     const result = await MessageService.sendGroupMessage(
       conversationId,
       senderId,
-      content
+      content,
     );
 
     return ApiResponse.success(
       res,
       result,
       "Message sent successfully",
-      HTTP_STATUS.CREATED
+      HTTP_STATUS.CREATED,
     );
   } catch (error) {
     return ApiResponse.error(
       res,
       error.message || MessagesError.ERROR.INTERNAL,
-      HTTP_STATUS.INTERNAL_SERVER_ERROR
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
     );
   }
 };
@@ -73,20 +73,20 @@ export const getConversationMessages = async (req, res) => {
       conversationId,
       userId,
       limit ? parseInt(limit) : 20,
-      cursor
+      cursor,
     );
 
     return ApiResponse.success(
       res,
       result,
       "Messages retrieved successfully",
-      HTTP_STATUS.OK
+      HTTP_STATUS.OK,
     );
   } catch (error) {
     return ApiResponse.error(
       res,
       error.message || MessagesError.ERROR.INTERNAL,
-      HTTP_STATUS.INTERNAL_SERVER_ERROR
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
     );
   }
 };
@@ -101,13 +101,13 @@ export const markMessageAsSeen = async (req, res) => {
       res,
       message,
       "Message marked as seen",
-      HTTP_STATUS.OK
+      HTTP_STATUS.OK,
     );
   } catch (error) {
     return ApiResponse.error(
       res,
       error.message || MessagesError.ERROR.INTERNAL,
-      HTTP_STATUS.INTERNAL_SERVER_ERROR
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
     );
   }
 };
@@ -119,20 +119,44 @@ export const markConversationAsRead = async (req, res) => {
 
     const conversation = await MessageService.markConversationAsRead(
       conversationId,
-      userId
+      userId,
     );
 
     return ApiResponse.success(
       res,
       conversation,
       "Conversation marked as read",
-      HTTP_STATUS.OK
+      HTTP_STATUS.OK,
     );
   } catch (error) {
     return ApiResponse.error(
       res,
       error.message || MessagesError.ERROR.INTERNAL,
-      HTTP_STATUS.INTERNAL_SERVER_ERROR
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    );
+  }
+};
+
+export const getPublicMessages = async (req, res) => {
+  try {
+    const { limit, cursor } = req.query;
+
+    const result = await MessageService.getPublicMessages(
+      limit ? parseInt(limit) : 50,
+      cursor,
+    );
+
+    return ApiResponse.success(
+      res,
+      result,
+      "Public messages retrieved successfully",
+      HTTP_STATUS.OK,
+    );
+  } catch (error) {
+    return ApiResponse.error(
+      res,
+      error.message || MessagesError.ERROR.INTERNAL,
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
     );
   }
 };
